@@ -1,26 +1,32 @@
 import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Scanner;
 
 public class Client {
-    private final static int port = 55000;
+
+    private final static int port = 34567;
     private final static String ip = "localhost";
     private static Socket socket;
+    public static String username = null;
 
     public static Scanner in = new Scanner(System.in);
-    public static ObjectOutputStream objOutput = null;
-    public static ObjectInputStream objInput = null;
-    public static HashMap<String, String> hash;
-    public static String username = null;
-    public static Packet data;
-    public static OutputStream outStream = null;
-    public static InputStream inStream = null;
+    public static DataOutputStream output = null;
 
 
     public static void main(String args[]) throws Exception{
         socket = new Socket(ip,port);
         menu();
+    }
+
+    public static User parseLine (String userInput) {
+        String[] tokens = userInput.split(" ");
+
+        return new User(
+                tokens[0],
+                tokens[1]);
     }
 
     public static String initialMenu(){
@@ -61,7 +67,6 @@ public class Client {
         return option;
     }
 
-
     public static void authUser() throws IOException{
         String option;
 
@@ -75,21 +80,17 @@ public class Client {
             System.out.println("password:");
             String pass = in.nextLine();
 
+            DataOutputStream out = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+            out.writeInt(1);
+            out.flush();
+            String userInput = user + " " + pass;
+            User newUser = parseLine(userInput);
+            newUser.serialize(out);
 
-            hash = new HashMap<>();
-            hash.put(Server.User_Name, user);
-            hash.put(Server.User_Password, pass);
-            data = new Packet(Server.Login_User,hash);
-
-
-            objOutput = new ObjectOutputStream(socket.getOutputStream());
-            objOutput.writeObject(data);
-            objOutput.flush();
-
-            BufferedReader socketInput = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            String auth = socketInput.readLine();
+            DataInputStream in = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
+            Boolean auth = in.readBoolean();
             System.out.println(auth);
-            if(auth.equals("Authenticated")){
+            if(auth){
                 username = user;
                 authMenu();
             }
@@ -106,18 +107,13 @@ public class Client {
                 System.out.println("Password");
                 String pass = in.nextLine();
 
-                hash = new HashMap<>();
-                hash.put(Server.User_Name, user);
-                hash.put(Server.User_Password, pass);
+                DataOutputStream out = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
 
-                data = new Packet(Server.Register_User,hash);
-
-                objOutput = new ObjectOutputStream(socket.getOutputStream());
-                objOutput.writeObject(data);
-                objOutput.flush();
-
-                BufferedReader socketInput = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                System.out.println("\n"+socketInput.readLine()+"\n");
+                out.writeInt(2);
+                out.flush();
+                String userInput = user + " " + pass;
+                User newUser = parseLine(userInput);
+                newUser.serialize(out);
             }
         }
     }
@@ -129,16 +125,16 @@ public class Client {
 
         do {
             if(option.equals("2")){
-                //menuUploadMusica();
+                //menu();
             }
             if(option.equals("1")){
-              //  menuDownloadMusica();
+                //  menu();
             }
             if(option.equals("3")) {
-               // menuMusicas();
+                // menu();
             }
             if(option.equals("4")){
-               // logoutUtili();
+                // logout();
             }
             else{
                 if (!(option.equals("1") || option.equals("2") || option.equals("3")))
@@ -147,4 +143,6 @@ public class Client {
             }
         } while(!(option.equals("1") || option.equals("2") || option.equals("3")));
     }
+
+
 }

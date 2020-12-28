@@ -1,3 +1,6 @@
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.io.Serializable;
 
 public class User implements Serializable {
@@ -5,23 +8,12 @@ public class User implements Serializable {
     private String password;
     private Boolean state; // Infected: True or False
 
-    public User() {
-        this.username = "";
-        this.password = "";
-        this.state = false;
+    public User(String username, String password) {
+        this.username = username;
+        this.password = password;
+        this.state = null;
     }
 
-    public User(String s, String p) {
-        this.username = s;
-        this.password = p;
-        this.state = false;
-    }
-
-    public User(User u) {
-        this.username = u.getUsername();
-        this.password = u.getPassword();
-        this.state = u.getState();
-    }
 
     public void setUsername(String username) {
         this.username = username;
@@ -41,6 +33,19 @@ public class User implements Serializable {
     }
     public Boolean getState(){
         return state;
+    }
+
+    public void serialize (DataOutputStream out) throws IOException {
+        out.writeUTF((this.username));
+        out.writeUTF(this.password);
+        out.flush();
+    }
+
+    public static User deserialize (DataInputStream in) throws IOException{
+        String username = in.readUTF();
+        String password = in.readUTF();
+
+        return new User(username,password);
     }
 
 }
