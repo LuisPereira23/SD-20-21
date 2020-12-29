@@ -23,19 +23,10 @@ class ServerWorker implements Runnable {
 
             while (isActive) {
 
-                int option = in.readInt();
-                System.out.println(option);
-
-                if (option == 1){
-                   boolean state = covidalarm.authenticateUser(in);
-                    out.writeBoolean(state);
-                    out.flush();
-                }
-
-                if (option == 2) {
-                    covidalarm.addUser(in);
-                    System.out.println(covidalarm.convertWithStream());
-                }
+                boolean auth = covidalarm.OptionChose(in);
+                out.writeBoolean(auth);
+                out.flush();
+                System.out.println(covidalarm.convertWithStream());
             }
 
             socket.shutdownInput();

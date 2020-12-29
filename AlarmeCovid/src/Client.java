@@ -44,16 +44,14 @@ public class Client {
         String pass = in.nextLine();
 
         DataOutputStream out = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
-        out.writeInt(1);
-        out.flush();
-        User newUser = new User(user, pass);
-        newUser.serialize(out);
+        Packet newPacket = new Packet(1,user,pass,false);
+        newPacket.serialize(out);
 
         DataInputStream in = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
         Boolean auth = in.readBoolean();
         System.out.println(auth); //debug
 
-        if (auth) userMenu(newUser);
+        if (auth) userMenu(user);
         else{
             System.out.println("Failed Authentication.\n");
             mainMenu();
@@ -70,18 +68,16 @@ public class Client {
 
         DataOutputStream out = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
 
-        out.writeInt(2);
-        out.flush();
-        User newUser = new User(user, pass);
-        newUser.serialize(out);
+        Packet newPacket = new Packet(2,user,pass,false);
+        newPacket.serialize(out);
 
         System.out.println("Registered.\n");
         mainMenu();
     }
 
-    public static void userMenu(User user) throws IOException {
+    public static void userMenu(String username) throws IOException {
         System.out.println("\n****** User Menu ******");
-        System.out.println("[ Bem-vindo " + user.getUsername() + " ]\n");
+        System.out.println("[ Bem-vindo " + username + " ]\n");
         System.out.println("1 - Consultar dados de uma localização");
         System.out.println("2 - Comunicar infeção");
         //System.out.println("3 - etc...");
@@ -90,7 +86,7 @@ public class Client {
 
         switch (option) {
             case "1" -> localInfo();
-            case "2" -> reportCovid(user);
+            case "2" -> reportCovid(username);
             //case "3" -> ...
             case "0" -> {
                 //logout(user);
@@ -98,7 +94,7 @@ public class Client {
             }
             default -> {
                 System.out.println("Invalid Option.\n");
-                userMenu(user);
+                userMenu(username);
             }
         }
     }
@@ -108,7 +104,7 @@ public class Client {
 
     };
 
-    public static void reportCovid(User user){
+    public static void reportCovid(String username){
 
     };
 

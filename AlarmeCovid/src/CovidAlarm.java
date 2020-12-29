@@ -30,30 +30,36 @@ public class CovidAlarm implements Serializable {
         return mapAsString;
     }
 
-    public void addUser(DataInputStream in) throws IOException {
-        User user = User.deserialize(in);
-        lock.lock();
-        try {
-            userRegister(user);
-        }finally {
-            lock.unlock();
+    public Boolean OptionChose(DataInputStream in) throws IOException{
+        Packet packet = Packet.deserialize(in);
+
+        switch (packet.getOption()) {
+            case 1 -> {
+                lock.lock();
+                try {
+                    return AuthUser(packet);
+                }finally {
+                    lock.unlock();
+                }
+            }
+            case 2 -> {
+                lock.lock();
+                try {
+                    return userRegister(packet);
+                }finally {
+                    lock.unlock();
+                }
+            }
+            default -> {
+                return false;
+            }
         }
     }
 
-    public boolean authenticateUser(DataInputStream in) throws IOException {
-        User user = User.deserialize(in);
-        lock.lock();
-        try {
-            return AuthUser(user);
-        }finally {
-            lock.unlock();
-        }
-    }
-
-    public boolean userRegister(User user){
+    public boolean userRegister(Packet packet){
         boolean y = false;
-        String username = user.getUsername();
-        String pass = user.getPassword();
+        String username = packet.getUsername();
+        String pass = packet.getPassword();
         if(!this.users.containsKey(username)){
             User u = new User(username,pass);
             this.users.put(username, u);
@@ -62,10 +68,10 @@ public class CovidAlarm implements Serializable {
         return y;
     }
 
-    public boolean AuthUser(User user){
+    public boolean AuthUser(Packet packet){
         boolean y = false;
-        String username = user.getUsername();
-        String pass = user.getPassword();
+        String username = packet.getUsername();
+        String pass = packet.getPassword();
             if(this.users.containsKey(username)) {
                 this.users.get(username).getPassword().equals(pass);
                 y = true;
