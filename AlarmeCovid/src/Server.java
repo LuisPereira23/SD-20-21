@@ -23,9 +23,11 @@ class ServerWorker implements Runnable {
 
             while (isActive) {
 
-                boolean auth = covidalarm.OptionChose(in);
-                out.writeBoolean(auth);
+                covidalarm.optionResult(in);
+                out.writeUTF(covidalarm.getInfo());
                 out.flush();
+
+                System.out.println(covidalarm.getInfo());
                 System.out.println(covidalarm.convertWithStream());
             }
 

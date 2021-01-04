@@ -9,11 +9,14 @@ public class Client {
 
     private final static int port = 34567;
     private final static String ip = "localhost";
-    private static Socket socket;
+    private static DataOutputStream output = null;
+    private static DataInputStream input = null;
     public static Scanner in = new Scanner(System.in);
 
-    public static void main(String args[]) throws Exception{
-        socket = new Socket(ip,port);
+    public static void main(String[] args) throws Exception{
+        Socket socket = new Socket(ip, port);
+        output = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+        input = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
         mainMenu();
     }
 
@@ -29,7 +32,9 @@ public class Client {
             case "2" -> userRegister();
             case "0" -> System.exit(0);
             default -> {
-                System.out.println("Invalid Option.\n");
+                System.out.println("Opção Inválida.");
+                in.nextLine();
+                in.nextLine();
                 mainMenu();
             }
         }
@@ -43,39 +48,36 @@ public class Client {
         System.out.println("Password:");
         String pass = in.nextLine();
 
-        DataOutputStream out = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
         Packet newPacket = new Packet(1,user,pass,false);
-        newPacket.serialize(out);
+        newPacket.serialize(output);
 
-        DataInputStream in = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
-        Boolean auth = in.readBoolean();
-        System.out.println(auth); //debug
+        String s = input.readUTF();
+        System.out.println(s); // informa se o login foi bem sucedido
+        in.nextLine();
 
-        if (auth) userMenu(user);
-        else{
-            System.out.println("Failed Authentication.\n");
+        if (s.charAt(0) == 'A')
+            userMenu(user, pass);
+        else
             mainMenu();
-        }
     }
 
     public static void userRegister() throws IOException{
-        System.out.println("-- Register --");
+        System.out.println("-- Registar Utilizador --");
         in.nextLine();
         System.out.println("Username:");
         String user = in.nextLine();
         System.out.println("Password:");
         String pass = in.nextLine();
 
-        DataOutputStream out = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
-
         Packet newPacket = new Packet(2,user,pass,false);
-        newPacket.serialize(out);
+        newPacket.serialize(output);
 
-        System.out.println("Registered.\n");
+        System.out.println(input.readUTF()); // informa se o registo foi bem sucedido
+        in.nextLine();
         mainMenu();
     }
 
-    public static void userMenu(String username) throws IOException {
+    public static void userMenu(String username, String pass) throws IOException {
         System.out.println("\n****** User Menu ******");
         System.out.println("[ Bem-vindo " + username + " ]\n");
         System.out.println("1 - Consultar dados de uma localização");
@@ -86,27 +88,31 @@ public class Client {
 
         switch (option) {
             case "1" -> localInfo();
-            case "2" -> reportCovid(username);
+            case "2" -> reportCovid(username, pass);
             //case "3" -> ...
-            case "0" -> {
-                //logout(user);
-                mainMenu();
-            }
+            case "0" -> mainMenu();
             default -> {
-                System.out.println("Invalid Option.\n");
-                userMenu(username);
+                System.out.println("Opção Inválida.");
+                in.nextLine();
+                in.nextLine();
+                userMenu(username, pass);
             }
         }
     }
-
 
     public static void localInfo(){
 
     };
 
-    public static void reportCovid(String username){
+    public static void reportCovid(String username, String pass) throws IOException {
 
+        Packet newPacket = new Packet(3,username,pass,true);
+        newPacket.serialize(output);
+
+        System.out.println(input.readUTF());
+        in.nextLine();
+        in.nextLine();
+        mainMenu();
     };
-
 
 }

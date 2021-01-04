@@ -19,7 +19,7 @@ public class User implements Serializable {
         this.password = password;
     }
     public void setState(Boolean state){
-        this.state=true;
+        this.state = state;
     }
 
     public String getUsername() {

@@ -4,12 +4,12 @@ import java.io.IOException;
 import java.io.Serializable;
 
 public class Packet implements Serializable {
-    int option;
-    private String username;
-    private String password;
-    Boolean state;
+    private final int option;
+    private final String username;
+    private final String password;
+    private Boolean state;
 
-    public Packet(int option,String username, String password,Boolean state) {
+    public Packet(int option, String username, String password, Boolean state) {
         this.option = option;
         this.username = username;
         this.password = password;

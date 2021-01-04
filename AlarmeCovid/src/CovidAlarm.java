@@ -9,35 +9,35 @@ import java.util.stream.Collectors;
 public class CovidAlarm implements Serializable {
     private Map<String, User> users;
     private ReentrantLock lock;
+    private String info;
 
     public CovidAlarm(){
         this.users = new HashMap<>();
         lock = new ReentrantLock();
+        this.info = null;
     }
 
-    public void setUser(HashMap<String,User> u){
-        this.users = u;
-    }
+    public void setUser(HashMap<String,User> u){ this.users = u; }
     public Map<String,User> getUser(){
         return this.users;
     }
+    public String getInfo() { return this.info; }
 
     public String convertWithStream() {
         Map<String, User> map = getUser();
-        String mapAsString = map.keySet().stream()
+        return map.keySet().stream()
                 .map(key -> key + "=" + map.get(key).getPassword())
                 .collect(Collectors.joining(", ", "{", "}"));
-        return mapAsString;
     }
 
-    public Boolean OptionChose(DataInputStream in) throws IOException{
+    public void optionResult(DataInputStream in) throws IOException{
         Packet packet = Packet.deserialize(in);
 
         switch (packet.getOption()) {
             case 1 -> {
                 lock.lock();
                 try {
-                    return AuthUser(packet);
+                    authUser(packet);
                 }finally {
                     lock.unlock();
                 }
@@ -45,37 +45,56 @@ public class CovidAlarm implements Serializable {
             case 2 -> {
                 lock.lock();
                 try {
-                    return userRegister(packet);
+                    userRegister(packet);
                 }finally {
                     lock.unlock();
                 }
             }
-            default -> {
-                return false;
+            case 3 -> {
+                lock.lock();
+                try {
+                    reportCovid(packet);
+                }finally {
+                    lock.unlock();
+                }
             }
+            default -> { }
         }
     }
 
-    public boolean userRegister(Packet packet){
-        boolean y = false;
+    public void authUser(Packet packet){
+        String username = packet.getUsername();
+        String pass = packet.getPassword();
+        if (this.users.containsKey(username)){
+            if (this.users.get(username).getPassword().equals(pass))
+                this.info = "Autenticação válida.";
+        }
+        else
+            this.info = "Erro de autenticação.";
+    }
+
+    public void userRegister(Packet packet){
         String username = packet.getUsername();
         String pass = packet.getPassword();
         if(!this.users.containsKey(username)){
             User u = new User(username,pass);
             this.users.put(username, u);
-            y = true;
+            this.info = "Registo efetuado com sucesso.";
         }
-        return y;
+        else
+            this.info = "Nome de utilizador já está em uso.";
     }
 
-    public boolean AuthUser(Packet packet){
-        boolean y = false;
+    public void reportCovid(Packet packet){
         String username = packet.getUsername();
-        String pass = packet.getPassword();
-            if(this.users.containsKey(username)) {
-                this.users.get(username).getPassword().equals(pass);
-                y = true;
-            }
-        return y;
+        this.users.get(username).setState(true);
+
+        /*
+        notificar localizações, etc ...
+        */
+
+        this.users.remove(username);
+        this.info = "Caso de infeção registado com sucesso.";
     }
+
 }
