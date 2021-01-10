@@ -9,6 +9,7 @@ class ServerWorker implements Runnable {
     public ServerWorker (Socket socket, CovidAlarm covidAlarm) {
         this.socket = socket;
         this.covidalarm = covidAlarm;
+
     }
 
     // @TODO
@@ -27,8 +28,8 @@ class ServerWorker implements Runnable {
                 out.writeUTF(covidalarm.getInfo());
                 out.flush();
 
-                System.out.println(covidalarm.getInfo());
-                System.out.println(covidalarm.convertWithStream());
+              //  System.out.println(covidalarm.getInfo());
+               // System.out.println(covidalarm.convertWithStream());
             }
 
             socket.shutdownInput();
@@ -46,7 +47,9 @@ public class Server {
 
     public static void main (String[] args) throws IOException {
         ServerSocket serverSocket = new ServerSocket(34567);
-        CovidAlarm covidAlarm = new CovidAlarm();
+        UserMap usermap = new UserMap();
+        CovidAlarm covidAlarm = new CovidAlarm(usermap);
+
 
         while (true) {
             Socket socket = serverSocket.accept();

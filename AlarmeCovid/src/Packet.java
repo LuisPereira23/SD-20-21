@@ -8,12 +8,18 @@ public class Packet implements Serializable {
     private final String username;
     private final String password;
     private Boolean state;
+    private Boolean special;
+    private int m;
+    private int n;
 
-    public Packet(int option, String username, String password, Boolean state) {
+    public Packet(int option, String username, String password, Boolean state,Boolean special,int m,int n) {
         this.option = option;
         this.username = username;
         this.password = password;
         this.state = state;
+        this.special = special;
+        this.m = m;
+        this.n = n;
     }
 
     public int getOption() {
@@ -28,12 +34,18 @@ public class Packet implements Serializable {
     public Boolean getState(){
         return state;
     }
+    public Boolean getSpecial(){return special;}
+    public int getM(){return m;}
+    public int getN(){return n;}
 
     public void serialize (DataOutputStream out) throws IOException {
         out.writeInt(this.option);
         out.writeUTF((this.username));
         out.writeUTF(this.password);
         out.writeBoolean(this.state);
+        out.writeBoolean(this.special);
+        out.writeInt(this.m);
+        out.writeInt(this.n);
         out.flush();
     }
 
@@ -42,8 +54,11 @@ public class Packet implements Serializable {
         String username = in.readUTF();
         String password = in.readUTF();
         Boolean state = in.readBoolean();
+        Boolean special = in.readBoolean();
+        int m = in.readInt();
+        int n = in.readInt();
 
-        return new Packet(option,username,password,state);
+        return new Packet(option,username,password,state,special,m,n);
     }
 
 }
