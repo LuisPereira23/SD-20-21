@@ -1,19 +1,34 @@
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
-public class User implements Serializable {
+public class User {
     private String username;
     private String password;
     private Boolean state; // Infected: True or False
+    private Boolean special;
+    private List<User> nearbyUsers;
+    private List<Position> safeLocations;
+    private List<Position> safeNotify;
+    private Position current;
 
-    public User(String username, String password) {
+
+    public User(String username, String password,boolean special, Position current) {
         this.username = username;
         this.password = password;
-        this.state = null;
+        this.state = false;
+        this.special = special;
+        this.nearbyUsers = new ArrayList<>();
+        this.current = current;
     }
 
+    public void addNearby(User user){
+        System.out.println("entered add");
+
+        if(this.nearbyUsers.stream().noneMatch(u->u.getUsername().equals(user.getUsername()))){
+            System.out.println("entered add if");
+            this.nearbyUsers.add(user);
+        }
+    }
 
     public void setUsername(String username) {
         this.username = username;
@@ -22,8 +37,9 @@ public class User implements Serializable {
         this.password = password;
     }
     public void setState(Boolean state){
-        this.state=true;
+        this.state = state;
     }
+    public void setCurrent(Position p){this.current = p;}
 
     public String getUsername() {
         return username;
@@ -34,18 +50,9 @@ public class User implements Serializable {
     public Boolean getState(){
         return state;
     }
-
-    public void serialize (DataOutputStream out) throws IOException {
-        out.writeUTF((this.username));
-        out.writeUTF(this.password);
-        out.flush();
-    }
-
-    public static User deserialize (DataInputStream in) throws IOException{
-        String username = in.readUTF();
-        String password = in.readUTF();
-
-        return new User(username,password);
+    public Position getCurrent(){return current;}
+    public List<User> getNearbyUsers() {
+        return nearbyUsers;
     }
 
 }
