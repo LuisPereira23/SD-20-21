@@ -93,6 +93,15 @@ public class CovidAlarm implements Serializable {
                     lock.unlock();
                 }
             }
+            case 8 -> checkMap();
+            case 9 -> {
+                lock.lock();
+                try {
+                    checkSpecial(packet);
+                } finally {
+                    lock.unlock();
+                }
+            }
             default -> { }
         }
     }
@@ -122,9 +131,7 @@ public class CovidAlarm implements Serializable {
             this.info = "Registo efetuado com sucesso.";
 
             for (User other : this.users.values()) {
-                System.out.println("entered register for");
-                if (!other.getUsername().equals(username) && other.getCurrent().equal(p)) {
-                    System.out.println("entered register if");
+                if (!other.getUsername().equals(username) && other.getCurrent().equals(p)) {
                     other.addNearby(user);
                     user.addNearby(other);
                 }
@@ -138,7 +145,6 @@ public class CovidAlarm implements Serializable {
         String username = packet.getUsername();
         User user = this.users.get(username);
         this.users.get(username).setState(true);
-        Position old = user.getCurrent();
         int m = packet.getM();
         int n = packet.getN();
         Position p = new Position(m,n);
@@ -152,11 +158,10 @@ public class CovidAlarm implements Serializable {
         int m = packet.getM();
         int n = packet.getN();
         Position p = new Position(m,n);
-        Position old = user.getCurrent();
         user.setCurrent(p);
 
         for (User other : this.users.values()) {
-            if (!other.getUsername().equals(username) && other.getCurrent().equal(p)) {
+            if (!other.getUsername().equals(username) && other.getCurrent().equals(p)) {
                 other.addNearby(user);
                 user.addNearby(other);
             }
@@ -172,7 +177,7 @@ public class CovidAlarm implements Serializable {
         Position p = new Position(m,n);
         boolean result = false;
         for (User user : this.users.values()) {
-            if (user.getCurrent().equal(p)) {
+            if (user.getCurrent().equals(p)) {
                 result=true;
             }
         }
@@ -187,7 +192,7 @@ public class CovidAlarm implements Serializable {
         int num = 0;
 
         for (User user : this.users.values()) {
-            if (user.getCurrent().equal(p)) {
+            if (user.getCurrent().equals(p)) {
                 num++;
             }
         }
@@ -199,24 +204,21 @@ public class CovidAlarm implements Serializable {
         User user = this.users.get(username);
         boolean result = false;
         List<User> list = user.getNearbyUsers();
-        System.out.println(list.size());
-
         for (User other : list) {
-
-            System.out.println("state: " + other.getState() + " name: " + other.getUsername());
             if (other.getState()) {
                 result = true;
             }
         }
-
-
-        /*
-        for (User other : user.getNearbyUsers()) {
-
-            if (other.getState())
-                result = true;
-        }
-        */
         this.info = Boolean.toString(result);
+    }
+
+    public void checkSpecial(Packet packet){
+        String username = packet.getUsername();
+        User user = this.users.get(username);
+        this.info=user.getSpecial().toString();
+    }
+
+    public void checkMap(){
+        this.info=usermap.stringMap();
     }
 }

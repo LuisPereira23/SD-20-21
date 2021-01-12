@@ -20,15 +20,39 @@ public class Position {
         return n;
     }
 
-    public boolean equal(Position p){
-        if (p.getm() == this.getm() && p.getn() == this.getn())
+    public int hashCode() {
+        int hash = 17;
+        hash = hash * 31 + this.getm();
+        hash = hash * 31 + this.getn();
+        return hash;
+    }
+
+@Override
+    public boolean equals(Object obj) {
+        if(this==obj) {
             return true;
-         else
+        }
+        if(obj==null||this.getClass()!=obj.getClass()) {
             return false;
+        }
+        Position p = (Position) obj;
+        int hash = 17;
+        hash = hash * 31 + this.getm();
+        hash = hash * 31 + this.getn();
+
+        int hashp = 17;
+        hashp = hashp * 31 + p.getm();
+        hashp = hashp * 31 + p.getn();
+
+        return (hash == hashp);
     }
 
     public Position clone(){
 
         return new Position(this);
+    }
+
+    public String toString() {
+        return "("+this.m+","+this.n+")";
     }
 }

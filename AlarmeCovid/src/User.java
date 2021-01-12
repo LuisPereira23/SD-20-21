@@ -22,10 +22,8 @@ public class User {
     }
 
     public void addNearby(User user){
-        System.out.println("entered add");
 
         if(this.nearbyUsers.stream().noneMatch(u->u.getUsername().equals(user.getUsername()))){
-            System.out.println("entered add if");
             this.nearbyUsers.add(user);
         }
     }
@@ -50,6 +48,7 @@ public class User {
     public Boolean getState(){
         return state;
     }
+    public Boolean getSpecial(){return special;}
     public Position getCurrent(){return current;}
     public List<User> getNearbyUsers() {
         return nearbyUsers;
