@@ -1,5 +1,9 @@
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.*;
-public class UserMap {
+public class UserMap implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 337319187162577375L;
     private Map<Position, List<User>> map;
 
     public UserMap(){
@@ -44,4 +48,5 @@ public class UserMap {
         }
         return result.toString();
     }
+
 }

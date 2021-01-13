@@ -1,5 +1,6 @@
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
@@ -8,6 +9,9 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 public class CovidAlarm implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 3726281774063155278L;
     private Map<String, User> users;
     UserMap usermap;
     private ReentrantLock lock;
@@ -220,5 +224,16 @@ public class CovidAlarm implements Serializable {
 
     public void checkMap(){
         this.info=usermap.stringMap();
+    }
+
+
+    public void saveCovid(){
+        lock.lock();
+        try {
+            IObjectStream a = new ObjectStream();
+            a.saveServer(this);
+        }finally {
+            lock.unlock();
+        }
     }
 }

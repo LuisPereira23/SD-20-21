@@ -15,7 +15,6 @@ class ServerWorker implements Runnable {
     // @TODO
     @Override
     public void run() {
-
         try {
             DataInputStream in = new DataInputStream(new BufferedInputStream(this.socket.getInputStream()));
             DataOutputStream out = new DataOutputStream(socket.getOutputStream());
@@ -28,16 +27,16 @@ class ServerWorker implements Runnable {
                 out.writeUTF(covidalarm.getInfo());
                 out.flush();
 
-              //  System.out.println(covidalarm.getInfo());
+                // System.out.println(covidalarm.getInfo());
                // System.out.println(covidalarm.convertWithStream());
             }
-
             socket.shutdownInput();
             socket.close();
             System.out.println("Connection closed ...");
 
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception ignored) {
+            covidalarm.saveCovid();
+            System.out.println(covidalarm.convertWithStream());
         }
     }
 }
@@ -47,14 +46,18 @@ public class Server {
 
     public static void main (String[] args) throws IOException {
         ServerSocket serverSocket = new ServerSocket(34567);
-        UserMap usermap = new UserMap();
-        CovidAlarm covidAlarm = new CovidAlarm(usermap);
-
+        IObjectStream a = new ObjectStream();
+        CovidAlarm covidAlarm = a.loadServer();
 
         while (true) {
-            Socket socket = serverSocket.accept();
-            Thread worker = new Thread(new ServerWorker(socket, covidAlarm));
-            worker.start();
+            try {
+                Socket socket = serverSocket.accept();
+                Thread worker = new Thread(new ServerWorker(socket, covidAlarm));
+                worker.start();
+            }catch (IOException e){
+                e.printStackTrace();
+            }
         }
+
     }
 }
