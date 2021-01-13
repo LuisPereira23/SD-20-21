@@ -9,28 +9,39 @@ public class UserMap {
     public void addUser(Position p, User user){
         List<User> users = this.map.get(p);
 
-        if(users == null){
+        if(users==null){
             users = new ArrayList<>();
         }
-        if(!users.stream().anyMatch(u->u.getUsername().equals(user.getUsername()))){
+
+        boolean existsUser = users.stream().anyMatch(u->u.getUsername().equals(user.getUsername()));
+        if(!existsUser){
             users.add(user);
         }
         this.map.put(p,users);
     }
 
+    public String stringMap() {
+        StringBuffer result = new StringBuffer();
 
-    public Boolean checkEmpty(Position p){
-        List<User> users = this.map.get(p);
-        boolean result = true;
-        if(users!=null){
-            Iterator<User> iterator = users.iterator();
-            while (iterator.hasNext()&&result){
-                User user = iterator.next();
-                result = !user.getCurrent().equals(p);
+
+        for (Map.Entry<Position,List<User>> e : this.map.entrySet()){
+            int infected = 0;
+            int users = 0;
+            Position p = e.getKey();
+            List<User> list = e.getValue();
+            result.append("Position: (").append(p.getm()).append(",").append(p.getn()).append(") -> [");
+
+            for(User user : list){
+
+                if(user.getState() == true){
+                    infected++;
+                } else{
+                    users++;
+                }
             }
+
+            result.append("#Users: "+users+" | #Infected: "+infected+" ]\n");
         }
-        return result;
+        return result.toString();
     }
-
-
 }
