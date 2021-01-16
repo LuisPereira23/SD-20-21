@@ -11,11 +11,7 @@ public class User implements Serializable {
     private Boolean state; // Infected: True or False
     private Boolean special;
     private List<User> nearbyUsers;
-<<<<<<< Updated upstream
-    private Position current;
-=======
     private Position position;
->>>>>>> Stashed changes
 
 
     public User(String username, String password,boolean special, Position pos) {

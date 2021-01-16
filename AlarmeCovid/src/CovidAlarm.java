@@ -218,15 +218,4 @@ public class CovidAlarm implements Serializable {
             lock.unlock();
         }
     }
-
-
-    public void saveCovid(){
-        lock.lock();
-        try {
-            IObjectStream a = new ObjectStream();
-            a.saveServer(this);
-        }finally {
-            lock.unlock();
-        }
-    }
 }

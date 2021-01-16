@@ -50,10 +50,6 @@ public class Client {
         String a = input.readUTF();
         System.out.println(a); // informa se o login foi bem sucedido
 
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
         if (a.charAt(0) == 'A') {
             newPacket = new Packet(9,user,pass,false,false,0,0);
             newPacket.serialize(output);
@@ -95,26 +91,13 @@ public class Client {
             else
                 mainMenu(socket);
         } else {
-<<<<<<< Updated upstream
-            System.out.println("Error defining location");
-=======
             System.out.println("Coordenadas inválidas.");
             in.nextLine();
->>>>>>> Stashed changes
             mainMenu(socket);
         }
     }
 
     public static void userMenu(String username, String pass, Boolean special,Socket socket) throws IOException {
-<<<<<<< Updated upstream
-        String state = checkStateAuto(username,pass);
-        if(state.charAt(0) == 't'){
-            state = "You might be infected";
-        } else {
-            state = "You haven't made contact with someone infected";
-        }
-=======
->>>>>>> Stashed changes
 
         if(!special){
             System.out.println("\n****** User Menu ******");
@@ -135,38 +118,6 @@ public class Client {
         System.out.println("0 - Sair");
         String option = in.next();
 
-<<<<<<< Updated upstream
-        if(special) {
-            switch (option) {
-                case "1" -> localInfo(username, pass, true,socket);
-                case "2" -> reportCovid(username, pass,socket);
-                case "3" -> getNumber(username, pass, true,socket);
-                case "4" -> changePosition(username, pass,true,socket);
-                case "5" -> checkStateManual(username, pass,true,socket);
-                case "6" -> printMap(username, pass,true,socket);
-                case "0" -> mainMenu(socket);
-                default -> {
-                    System.out.println("Opção Inválida.");
-                    in.nextLine();
-                    in.nextLine();
-                    userMenu(username, pass, true,socket);
-                }
-            }
-        }else {
-            switch (option) {
-                case "1" -> localInfo(username, pass,false,socket);
-                case "2" -> reportCovid(username, pass,socket);
-                case "3" -> getNumber(username, pass, false,socket);
-                case "4" -> changePosition(username, pass, false,socket);
-                case "5" -> checkStateManual(username, pass, false,socket);
-                case "0" -> mainMenu(socket);
-                default -> {
-                    System.out.println("Opção Inválida.");
-                    in.nextLine();
-                    in.nextLine();
-                    userMenu(username, pass, false,socket);
-                }
-=======
         switch (option) {
             case "1" -> localInfo(username, pass, special, socket);
             case "2" -> reportCovid(username, pass, socket);
@@ -174,7 +125,6 @@ public class Client {
             case "4" -> {
                 if (special) printMap(username, pass, special, socket);
                 else userDefaults(username, pass, special, socket);
->>>>>>> Stashed changes
             }
             case "5" -> userMenu(username, pass, special, socket);
             case "0" -> mainMenu(socket);
@@ -199,18 +149,6 @@ public class Client {
         System.out.println("Y:");
         String y = in.nextLine();
 
-<<<<<<< Updated upstream
-        if(position.length ==2){
-            try {
-                int m = Integer.parseInt(position[0].trim());
-                int n = Integer.parseInt(position[1].trim());
-
-                Packet newPacket = new Packet(4, user, pass, false, special, m, n);
-                newPacket.serialize(output);
-                String s = input.readUTF();
-            }catch (NumberFormatException e){System.out.println("Invalid format " +e.getMessage());}
-        }else{System.out.println("Invalid Location");}
-=======
         if(x.chars().allMatch(Character::isDigit) && y.chars().allMatch(Character::isDigit)){
 
             Packet newPacket = new Packet(4, user, pass, false, special, Integer.parseInt(x), Integer.parseInt(y));
@@ -219,59 +157,12 @@ public class Client {
 
         }
         else System.out.println("Coordenadas inválidas.");
->>>>>>> Stashed changes
         userMenu(user,pass,special,socket);
     }
 
     public static void localInfo(String user, String pass,Boolean special,Socket socket) throws IOException {
         in.nextLine();
 
-<<<<<<< Updated upstream
-        if(position.length ==2){
-            try {
-                int m = Integer.parseInt(position[0].trim());
-                int n = Integer.parseInt(position[1].trim());
-
-                Packet newPacket = new Packet(5, user, pass, false, special, m, n);
-                newPacket.serialize(output);
-                String s = input.readUTF();
-                if (s.equals("false")) {
-                    System.out.println("Safe location. Empty position");
-                } else {
-                    System.out.println("Location not safe");
-                }
-            }catch (NumberFormatException e){System.out.println("Invalid Format "+e.getMessage());}
-        }else{System.out.println("Invalid Location");}
-        userMenu(user,pass,special,socket);
-    }
-
-    public static void getNumber(String user,String pass,Boolean special,Socket socket) throws IOException {
-        in.nextLine();
-        System.out.println("Location to check (x y)");
-        String ioPosition = in.nextLine();
-        String[] position = ioPosition.split(" ");
-
-        if(position.length ==2){
-            try {
-                int m = Integer.parseInt(position[0].trim());
-                int n = Integer.parseInt(position[1].trim());
-
-                Packet newPacket = new Packet(6, user, pass, false, special, m, n);
-                newPacket.serialize(output);
-                String s = input.readUTF();
-                System.out.println("Number of people: " + s);
-            }catch (NumberFormatException e){System.out.println("Invalid Format " +e.getMessage());}
-        }else{System.out.println("Invalid Location");}
-        userMenu(user,pass,special,socket);
-    }
-
-    public static void checkStateManual(String user,String pass,Boolean special,Socket socket) throws IOException {
-        Packet newPacket = new Packet(7,user,pass,false,special,0,0);
-        newPacket.serialize(output);
-        String s = input.readUTF();
-        System.out.println("Could i be infected? " + s);
-        userMenu(user,pass,special,socket);
-=======
         System.out.println("Insira as coordenadas que pretende consultar.");
         System.out.println("X:");
         String x = in.nextLine();
@@ -315,7 +206,6 @@ public class Client {
         Packet newPacket = new Packet(7,user,pass,false,false,0,0);
         newPacket.serialize(output);
         return input.readUTF();
->>>>>>> Stashed changes
     }
 
     public static void userDefaults(String username, String pass, Boolean special,Socket socket) throws IOException {
@@ -325,17 +215,6 @@ public class Client {
         userMenu(username, pass, special, socket);
     }
 
-<<<<<<< Updated upstream
-    public static void printMap(String user,String pass,Boolean special,Socket socket) throws IOException {
-        Packet newPacket = new Packet(8,user,pass,false,false,0,0);
-        newPacket.serialize(output);
-        String s = input.readUTF();
-        System.out.println(s);
-        userMenu(user,pass,special,socket);
-    }
-
-=======
->>>>>>> Stashed changes
     public static void close(Socket socket) throws IOException {
         socket.close();
         System.exit(0);
