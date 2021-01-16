@@ -81,14 +81,6 @@ public class CovidAlarm implements Serializable {
                     lock.unlock();
                 }
             }
-            case 6 -> {
-                lock.lock();
-                try {
-                    checkNumber(packet);
-                }finally {
-                    lock.unlock();
-                }
-            }
             case 7 -> {
                 lock.lock();
                 try {
@@ -113,12 +105,26 @@ public class CovidAlarm implements Serializable {
     public void authUser(Packet packet){
         String username = packet.getUsername();
         String pass = packet.getPassword();
-        if (this.users.containsKey(username) && this.users.get(username).getState().equals(false)){
-            if (this.users.get(username).getPassword().equals(pass))
-                this.info = "Autenticação válida.";
+
+        if (this.users.containsKey(username)){ //user existe
+            if (this.users.get(username).getPassword().equals(pass)) { //pass está correta
+                if(this.users.get(username).getState().equals(false)) //user não tem covid
+                    this.info = "Autenticação válida.";
+                else
+                    this.info = "Utilizador deverá estar em quarantena.";
+            }
+            else this.info = "Palavra-passe incorreta.";
         }
-        else
-            this.info = "Erro de autenticação.";
+        else this.info = "Utilizador não existe.";
+    }
+
+    public void updateNearby(User user, Position p){
+        for (User other : this.users.values()) {
+            if (!other.equals(user) && other.getPosition().equals(p)) {
+                other.addNearby(user);
+                user.addNearby(other);
+            }
+        }
     }
 
     public void userRegister(Packet packet){
@@ -130,16 +136,12 @@ public class CovidAlarm implements Serializable {
         Position p = new Position(m,n);
         if(!this.users.containsKey(username)){
             User user = new User(username,pass,special,p);
-            usermap.addUser(p,user);
-            this.users.put(username, user);
-            this.info = "Registo efetuado com sucesso.";
 
-            for (User other : this.users.values()) {
-                if (!other.getUsername().equals(username) && other.getCurrent().equals(p)) {
-                    other.addNearby(user);
-                    user.addNearby(other);
-                }
-            }
+            this.usermap.addUser(p,user);
+            this.users.put(username, user);
+            updateNearby(user, p);
+
+            this.info = "Registo efetuado com sucesso.";
         }
         else
             this.info = "Nome de utilizador já está em uso.";
@@ -147,12 +149,13 @@ public class CovidAlarm implements Serializable {
 
     public void reportCovid(Packet packet){
         String username = packet.getUsername();
-        User user = this.users.get(username);
         this.users.get(username).setState(true);
         int m = packet.getM();
         int n = packet.getN();
-        Position p = new Position(m,n);
-        user.setCurrent(p);
+        Position p = new Position(m,n); //(m,n)=(9999,9999)
+
+        this.users.get(username).setPosition(p);
+
         this.info = "Caso de infeção registado com sucesso.";
     }
 
@@ -162,68 +165,58 @@ public class CovidAlarm implements Serializable {
         int m = packet.getM();
         int n = packet.getN();
         Position p = new Position(m,n);
-        user.setCurrent(p);
 
-        for (User other : this.users.values()) {
-            if (!other.getUsername().equals(username) && other.getCurrent().equals(p)) {
-                other.addNearby(user);
-                user.addNearby(other);
-            }
-        }
-
-
+        this.users.get(username).setPosition(p);
+        updateNearby(user, p);
         this.usermap.addUser(p.clone(),user);
+
+        this.info = "Posição atualizada com sucesso.";
     }
 
     public void checkPosition(Packet packet){
         int m = packet.getM();
         int n = packet.getN();
         Position p = new Position(m,n);
-        boolean result = false;
-        for (User user : this.users.values()) {
-            if (user.getCurrent().equals(p)) {
-                result=true;
-            }
-        }
-
-        this.info = Boolean.toString(result);
-    }
-
-    public void checkNumber(Packet packet){
-        int m = packet.getM();
-        int n = packet.getN();
-        Position p = new Position(m,n);
         int num = 0;
-
         for (User user : this.users.values()) {
-            if (user.getCurrent().equals(p)) {
+            if (user.getPosition().equals(p)) {
                 num++;
             }
         }
-        this.info = Integer.toString(num);
+        if (num>0)
+            this.info = num + " pessoas estão presentes nesta localização.";
+        else
+            this.info = "Não existe ninguém nesta localização.";
     }
 
     public void checkState(Packet packet){
         String username = packet.getUsername();
-        User user = this.users.get(username);
-        boolean result = false;
-        List<User> list = user.getNearbyUsers();
-        for (User other : list) {
+        for (User other : this.users.get(username).getNearbyUsers()) {
             if (other.getState()) {
-                result = true;
+                this.info = "Atenção, esteve em contacto com um utilizador infetado.";
+                break;
             }
         }
-        this.info = Boolean.toString(result);
+        this.info = "Não esteve em contacto com nenhum caso de infeção.";
     }
 
     public void checkSpecial(Packet packet){
         String username = packet.getUsername();
-        User user = this.users.get(username);
-        this.info=user.getSpecial().toString();
+        this.info = this.users.get(username).getSpecial().toString();
     }
 
     public void checkMap(){
-        this.info=usermap.stringMap();
+        this.info = usermap.stringMap();
+    }
+
+    public void saveCovid(){
+        lock.lock();
+        try {
+            IObjectStream a = new ObjectStream();
+            a.saveServer(this);
+        }finally {
+            lock.unlock();
+        }
     }
 
 

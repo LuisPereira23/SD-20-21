@@ -11,49 +11,38 @@ public class User implements Serializable {
     private Boolean state; // Infected: True or False
     private Boolean special;
     private List<User> nearbyUsers;
+<<<<<<< Updated upstream
     private Position current;
+=======
+    private Position position;
+>>>>>>> Stashed changes
 
 
-    public User(String username, String password,boolean special, Position current) {
+    public User(String username, String password,boolean special, Position pos) {
         this.username = username;
         this.password = password;
         this.state = false;
         this.special = special;
         this.nearbyUsers = new ArrayList<>();
-        this.current = current;
+        this.position = pos;
     }
 
     public void addNearby(User user){
-
-        if(this.nearbyUsers.stream().noneMatch(u->u.getUsername().equals(user.getUsername()))){
-            this.nearbyUsers.add(user);
-        }
+        this.nearbyUsers.add(user);
     }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
-    public void setPassword(String password) {
-        this.password = password;
-    }
-    public void setState(Boolean state){
-        this.state = state;
-    }
-    public void setCurrent(Position p){this.current = p;}
+    public void setUsername(String username) { this.username = username; }
+    public void setPassword(String password) { this.password = password; }
+    public void setState(Boolean state){ this.state = state; }
+    public void setPosition(Position p){this.position = p;}
 
-    public String getUsername() {
-        return username;
-    }
-    public String getPassword() {
-        return password;
-    }
-    public Boolean getState(){
-        return state;
-    }
+    public String getUsername() { return username; }
+    public String getPassword() { return password; }
+    public Boolean getState(){ return state; }
     public Boolean getSpecial(){return special;}
-    public Position getCurrent(){return current;}
-    public List<User> getNearbyUsers() {
-        return nearbyUsers;
-    }
+    public Position getPosition(){return position;}
+    public List<User> getNearbyUsers() { return nearbyUsers; }
+
+    public boolean equals(User user){ return user.getUsername().equals(this.username); }
 
 }

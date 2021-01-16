@@ -27,8 +27,11 @@ class ServerWorker implements Runnable {
                 out.writeUTF(covidalarm.getInfo());
                 out.flush();
 
+<<<<<<< Updated upstream
                 // System.out.println(covidalarm.getInfo());
                // System.out.println(covidalarm.convertWithStream());
+=======
+>>>>>>> Stashed changes
             }
             socket.shutdownInput();
             socket.close();

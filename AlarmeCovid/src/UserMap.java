@@ -33,18 +33,18 @@ public class UserMap implements Serializable {
             int users = 0;
             Position p = e.getKey();
             List<User> list = e.getValue();
-            result.append("Position: (").append(p.getm()).append(",").append(p.getn()).append(") -> [");
+            result.append("Posição: (").append(p.getm()).append(",").append(p.getn()).append(") -> [");
 
             for(User user : list){
 
-                if(user.getState() == true){
+                if(user.getState()){
                     infected++;
                 } else{
                     users++;
                 }
             }
 
-            result.append("#Users: "+users+" | #Infected: "+infected+" ]\n");
+            result.append("#Users: "+users+" | #Infetados: "+infected+" ]\n");
         }
         return result.toString();
     }
