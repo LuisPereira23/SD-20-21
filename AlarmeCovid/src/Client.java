@@ -76,9 +76,6 @@ public class Client {
             System.out.println("Password não pode ser vazia");
             mainMenu(socket);
         }
-        System.out.println("Utilizador é admin? (y/n)");
-        String inSpecial = in.nextLine();
-        Boolean special = inSpecial.equals("y") || inSpecial.equals("Y");
         System.out.println("Insira as suas coordenadas atuais. (x y)");
         String ioPosition = in.nextLine();
         String[] position = ioPosition.split(" ");
@@ -87,12 +84,12 @@ public class Client {
                 int m = Integer.parseInt(position[0].trim());
                 int n = Integer.parseInt(position[1].trim());
 
-                Packet newPacket = new Packet(2, user, pass, false, special, m, n);
+                Packet newPacket = new Packet(2, user, pass, false, false, m, n);
                 newPacket.serialize(output);
                 String auth = input.readUTF();
                 System.out.println(auth); // informa se o registo foi bem sucedido
                 if (auth.charAt(0) == 'R')
-                    userMenu(user, pass, special, socket);
+                    userMenu(user, pass, false, socket);
                 else
                     mainMenu(socket);
             }catch (NumberFormatException e){System.out.println("Formato Inválido " +e.getMessage());}

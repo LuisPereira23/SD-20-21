@@ -30,9 +30,9 @@ public class CovidAlarm implements Serializable {
     }
     public String getInfo() { return this.info; }
 
-    public String convertWithStream() {
+    public void userAccounts() {
         Map<String, User> map = getUser();
-        return map.keySet().stream()
+        this.info= map.keySet().stream()
                 .map(key -> key + "=" + map.get(key).getPassword())
                 .collect(Collectors.joining(", ", "{", "}"));
     }
@@ -89,11 +89,34 @@ public class CovidAlarm implements Serializable {
                     lock.unlock();
                 }
             }
-            case 7 -> checkMap();
+            case 7 -> {
+                lock.lock();
+                try {
+                    checkMap();
+                } finally {
+                    lock.unlock();
+                }
+            }
             case 8 -> {
                 lock.lock();
                 try {
                     checkSpecial(packet);
+                } finally {
+                    lock.unlock();
+                }
+            }
+            case 9 -> {
+                lock.lock();
+                try {
+                    saveCovid();
+                } finally {
+                    lock.unlock();
+                }
+            }
+            case 10 -> {
+                lock.lock();
+                try {
+                    userAccounts();
                 } finally {
                     lock.unlock();
                 }
@@ -217,6 +240,7 @@ public class CovidAlarm implements Serializable {
         try {
             IObjectStream a = new ObjectStream();
             a.saveServer(this);
+            this.info = "Estado do servidor gravado com sucesso";
         }finally {
             lock.unlock();
         }

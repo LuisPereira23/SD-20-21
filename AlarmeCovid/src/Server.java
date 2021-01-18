@@ -32,8 +32,6 @@ class ServerWorker implements Runnable {
             System.out.println("Connection closed ...");
 
         } catch (Exception ignored) {
-            covidalarm.saveCovid();
-            System.out.println(covidalarm.convertWithStream());
         }
     }
 }
