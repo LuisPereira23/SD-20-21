@@ -1,5 +1,6 @@
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
@@ -8,6 +9,9 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 public class CovidAlarm implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 3726281774063155278L;
     private Map<String, User> users;
     UserMap usermap;
     private ReentrantLock lock;
@@ -80,21 +84,13 @@ public class CovidAlarm implements Serializable {
             case 6 -> {
                 lock.lock();
                 try {
-                    checkNumber(packet);
-                }finally {
-                    lock.unlock();
-                }
-            }
-            case 7 -> {
-                lock.lock();
-                try {
                     checkState(packet);
                 }finally {
                     lock.unlock();
                 }
             }
-            case 8 -> checkMap();
-            case 9 -> {
+            case 7 -> checkMap();
+            case 8 -> {
                 lock.lock();
                 try {
                     checkSpecial(packet);
@@ -109,12 +105,14 @@ public class CovidAlarm implements Serializable {
     public void authUser(Packet packet){
         String username = packet.getUsername();
         String pass = packet.getPassword();
-        if (this.users.containsKey(username) && this.users.get(username).getState().equals(false)){
-            if (this.users.get(username).getPassword().equals(pass))
-                this.info = "Autenticação válida.";
-        }
-        else
-            this.info = "Erro de autenticação.";
+
+        if (this.users.containsKey(username)){ //user existe
+            if (this.users.get(username).getPassword().equals(pass)) { //pass está correta
+                if(this.users.get(username).getState().equals(false)) { //user não tem covid
+                    this.info = "Autenticação válida.";
+                }else{this.info = "Utilizador deverá estar em quarantena."; }
+            } else{this.info = "Palavra-passe incorreta.";}
+        }else{this.info = "Utilizador não existe.";}
     }
 
     public void userRegister(Packet packet){
@@ -166,37 +164,24 @@ public class CovidAlarm implements Serializable {
                 user.addNearby(other);
             }
         }
-
-
         this.usermap.addUser(p.clone(),user);
+        this.info = "Posição atualizada com sucesso.";
     }
 
     public void checkPosition(Packet packet){
         int m = packet.getM();
         int n = packet.getN();
         Position p = new Position(m,n);
-        boolean result = false;
-        for (User user : this.users.values()) {
-            if (user.getCurrent().equals(p)) {
-                result=true;
-            }
-        }
-
-        this.info = Boolean.toString(result);
-    }
-
-    public void checkNumber(Packet packet){
-        int m = packet.getM();
-        int n = packet.getN();
-        Position p = new Position(m,n);
         int num = 0;
-
         for (User user : this.users.values()) {
             if (user.getCurrent().equals(p)) {
                 num++;
             }
         }
-        this.info = Integer.toString(num);
+        if (num>0)
+            this.info = num + " pessoas estão presentes nesta localização.";
+        else
+            this.info = "Não existe ninguém nesta localização.";
     }
 
     public void checkState(Packet packet){
@@ -209,7 +194,11 @@ public class CovidAlarm implements Serializable {
                 result = true;
             }
         }
-        this.info = Boolean.toString(result);
+        if(result == true){
+            this.info = "Atenção, esteve em contacto com um utilizador infetado.";
+        }else{
+            this.info = "Não esteve em contacto com nenhum caso de infeção.";
+        }
     }
 
     public void checkSpecial(Packet packet){
@@ -220,5 +209,16 @@ public class CovidAlarm implements Serializable {
 
     public void checkMap(){
         this.info=usermap.stringMap();
+    }
+
+
+    public void saveCovid(){
+        lock.lock();
+        try {
+            IObjectStream a = new ObjectStream();
+            a.saveServer(this);
+        }finally {
+            lock.unlock();
+        }
     }
 }

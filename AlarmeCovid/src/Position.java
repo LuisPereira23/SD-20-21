@@ -1,4 +1,9 @@
-public class Position {
+import java.io.Serial;
+import java.io.Serializable;
+
+public class Position implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 2558133998386380997L;
     private int m;
     private int n;
 

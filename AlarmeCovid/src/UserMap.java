@@ -1,5 +1,9 @@
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.*;
-public class UserMap {
+public class UserMap implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 337319187162577375L;
     private Map<Position, List<User>> map;
 
     public UserMap(){
@@ -29,7 +33,7 @@ public class UserMap {
             int users = 0;
             Position p = e.getKey();
             List<User> list = e.getValue();
-            result.append("Position: (").append(p.getm()).append(",").append(p.getn()).append(") -> [");
+            result.append("Posição: (").append(p.getm()).append(",").append(p.getn()).append(") -> [");
 
             for(User user : list){
 
@@ -40,8 +44,9 @@ public class UserMap {
                 }
             }
 
-            result.append("#Users: "+users+" | #Infected: "+infected+" ]\n");
+            result.append("#Users: "+users+" | #Infetados: "+infected+" ]\n");
         }
         return result.toString();
     }
+
 }

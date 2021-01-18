@@ -1,14 +1,16 @@
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class User {
+public class User implements Serializable {
+    @Serial
+    private static final long serialVersionUID = -7149009667160496245L;
     private String username;
     private String password;
     private Boolean state; // Infected: True or False
     private Boolean special;
     private List<User> nearbyUsers;
-    private List<Position> safeLocations;
-    private List<Position> safeNotify;
     private Position current;
 
 
