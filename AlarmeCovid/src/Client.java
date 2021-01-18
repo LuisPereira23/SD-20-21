@@ -51,7 +51,7 @@ public class Client {
         System.out.println(a); // informa se o login foi bem sucedido
 
         if (a.charAt(0) == 'A') {
-            newPacket = new Packet(9,user,pass,false,false,0,0);
+            newPacket = new Packet(8,user,pass,false,false,0,0);
             newPacket.serialize(output);
             String s  = input.readUTF();
             Boolean special = Boolean.parseBoolean(s);
@@ -66,33 +66,39 @@ public class Client {
         in.nextLine();
         System.out.println("Username:");
         String user = in.nextLine();
+        if(user.isBlank()){
+            System.out.println("Username não pode ser vazio");
+            mainMenu(socket);
+        }
         System.out.println("Password:");
         String pass = in.nextLine();
-
+        if(pass.isBlank()){
+            System.out.println("Password não pode ser vazia");
+            mainMenu(socket);
+        }
         System.out.println("Utilizador é admin? (y/n)");
-        String IOspecial = in.nextLine();
-        Boolean special = IOspecial.equals("y") || IOspecial.equals("Y");
+        String inSpecial = in.nextLine();
+        Boolean special = inSpecial.equals("y") || inSpecial.equals("Y");
+        System.out.println("Insira as suas coordenadas atuais. (x y)");
+        String ioPosition = in.nextLine();
+        String[] position = ioPosition.split(" ");
+        if(position.length ==2){
+            try {
+                int m = Integer.parseInt(position[0].trim());
+                int n = Integer.parseInt(position[1].trim());
 
-        System.out.println("Insira as suas coordenadas atuais.");
-        System.out.println("X:");
-        String x = in.nextLine();
-        System.out.println("Y:");
-        String y = in.nextLine();
-
-        if(x.chars().allMatch(Character::isDigit) && y.chars().allMatch(Character::isDigit)){
-
-            Packet newPacket = new Packet(2,user,pass,false,special,Integer.parseInt(x),Integer.parseInt(y));
-            newPacket.serialize(output);
-            String auth = input.readUTF();
-            System.out.println(auth); // informa se o registo foi bem sucedido
-            in.nextLine();
-            if(auth.charAt(0) == 'R')
-                userMenu(user,pass,special,socket);
-            else
-                mainMenu(socket);
-        } else {
+                Packet newPacket = new Packet(2, user, pass, false, special, m, n);
+                newPacket.serialize(output);
+                String auth = input.readUTF();
+                System.out.println(auth); // informa se o registo foi bem sucedido
+                if (auth.charAt(0) == 'R')
+                    userMenu(user, pass, special, socket);
+                else
+                    mainMenu(socket);
+            }catch (NumberFormatException e){System.out.println("Formato Inválido " +e.getMessage());}
+        } else
+            {
             System.out.println("Coordenadas inválidas.");
-            in.nextLine();
             mainMenu(socket);
         }
     }
@@ -111,10 +117,8 @@ public class Client {
         System.out.println("\n1 - Consultar dados de uma localização");
         System.out.println("2 - Comunicar caso de infeção");
         System.out.println("3 - Atualizar localização");
-
-        if (special) System.out.println("4 - Consultar Mapa");
-
-        System.out.println("5 - Atualizar informações do menu");
+        System.out.println("4 - Atualizar informações do menu");
+        if (special) System.out.println("5 - Consultar Mapa");
         System.out.println("0 - Sair");
         String option = in.next();
 
@@ -122,11 +126,11 @@ public class Client {
             case "1" -> localInfo(username, pass, special, socket);
             case "2" -> reportCovid(username, pass, socket);
             case "3" -> changePosition(username, pass, special, socket);
-            case "4" -> {
-                if (special) printMap(username, pass, special, socket);
-                else userDefaults(username, pass, special, socket);
+            case "4" -> userMenu(username, pass, special, socket);
+            case "5" -> {
+                if (special) printMap(username, pass, true, socket);
+                else userDefaults(username, pass, false, socket);
             }
-            case "5" -> userMenu(username, pass, special, socket);
             case "0" -> mainMenu(socket);
             default -> userDefaults(username, pass, special, socket);
         }
@@ -143,69 +147,75 @@ public class Client {
 
     public static void changePosition(String user,String pass,Boolean special,Socket socket) throws IOException {
         in.nextLine();
-        System.out.println("Insira as suas novas coordenadas.");
-        System.out.println("X:");
-        String x = in.nextLine();
-        System.out.println("Y:");
-        String y = in.nextLine();
+        System.out.println("Insira as suas novas coordenadas. (x y)");
+        String ioPosition = in.nextLine();
+        String[] position = ioPosition.split(" ");
 
-        if(x.chars().allMatch(Character::isDigit) && y.chars().allMatch(Character::isDigit)){
+        if(position.length ==2){
+            try {
+                int m = Integer.parseInt(position[0].trim());
+                int n = Integer.parseInt(position[1].trim());
 
-            Packet newPacket = new Packet(4, user, pass, false, special, Integer.parseInt(x), Integer.parseInt(y));
-            newPacket.serialize(output);
-            System.out.println(input.readUTF());
-
-        }
-        else System.out.println("Coordenadas inválidas.");
+                Packet newPacket = new Packet(4, user, pass, false, special, m, n);
+                newPacket.serialize(output);
+                System.out.println(input.readUTF());
+            }catch (NumberFormatException e){System.out.println("Formato inválido " +e.getMessage());}
+        }else{System.out.println("Coordenadas inválidas.");}
         userMenu(user,pass,special,socket);
     }
 
     public static void localInfo(String user, String pass,Boolean special,Socket socket) throws IOException {
         in.nextLine();
+        System.out.println("Insira as coordenadas que pretende consultar. (x y)");
+        String ioPosition = in.nextLine();
+        String[] position = ioPosition.split(" ");
 
-        System.out.println("Insira as coordenadas que pretende consultar.");
-        System.out.println("X:");
-        String x = in.nextLine();
-        System.out.println("Y:");
-        String y = in.nextLine();
+        if(position.length ==2){
+            try {
+                int m = Integer.parseInt(position[0].trim());
+                int n = Integer.parseInt(position[1].trim());
+                Packet newPacket = new Packet(5, user, pass, false, special, m, n);
+                newPacket.serialize(output);
+                String s = input.readUTF();
+                System.out.println(s);
 
-        if(x.chars().allMatch(Character::isDigit) && y.chars().allMatch(Character::isDigit)){
-            int m = Integer.parseInt(x);
-            int n = Integer.parseInt(y);
-            Packet newPacket = new Packet(5, user, pass, false, special, m, n);
-            newPacket.serialize(output);
-            String a = input.readUTF();
-            System.out.println(a);
-
-            //se nao existir ninguem na localização
-            if(a.charAt(0) == 'N'){
-                System.out.println("Deseja deslocar-se para esta localização? (y/n)");
-                String yes = in.nextLine();
-                if (yes.equals("y") || yes.equals("Y")){
-                    Packet newPacket2 = new Packet(4, user, pass, false, special, m, n);
-                    newPacket2.serialize(output);
-                    System.out.println(input.readUTF());
+                //se nao existir ninguem na localização
+                if(s.charAt(0) == 'N'){
+                    System.out.println("Deseja deslocar-se para esta localização? (y/n)");
+                    String yes = in.nextLine();
+                    if (yes.equals("y") || yes.equals("Y")){
+                        Packet newPacket2 = new Packet(4, user, pass, false, special, m, n);
+                        newPacket2.serialize(output);
+                        System.out.println(input.readUTF());
+                        System.out.println("\n Enter para continuar ");
+                        in.nextLine();
+                        in.nextLine();
+                    }
+                    else System.out.println("Localização não alterada.");
+                    System.out.println("\n Enter para continuar ");
+                    in.nextLine();
+                    in.nextLine();
                 }
-                else System.out.println("Localização não alterada.");
-            }
-        }
-        else System.out.println("Coordenadas inválidas.");
-        userMenu(user,pass,special,socket);
-    }
-
-    public static void printMap(String user,String pass,Boolean special,Socket socket) throws IOException {
-        Packet newPacket = new Packet(8,user,pass,false,false,0,0);
-        newPacket.serialize(output);
-        System.out.println(input.readUTF());
-        in.nextLine();
-        in.nextLine();
+            }catch (NumberFormatException e){System.out.println("Formato inválido "+e.getMessage());}
+        }else{System.out.println("Coordenadas inválidas.");}
         userMenu(user,pass,special,socket);
     }
 
     public static String checkState(String user,String pass) throws IOException {
-        Packet newPacket = new Packet(7,user,pass,false,false,0,0);
+        Packet newPacket = new Packet(6,user,pass,false,false,0,0);
         newPacket.serialize(output);
         return input.readUTF();
+    }
+
+    public static void printMap(String user,String pass,Boolean special,Socket socket) throws IOException {
+        Packet newPacket = new Packet(7,user,pass,false,false,0,0);
+        newPacket.serialize(output);
+        String s = input.readUTF();
+        System.out.println(s);
+        System.out.println("\nEnter para continuar ");
+        in.nextLine();
+        in.nextLine();
+        userMenu(user,pass,special,socket);
     }
 
     public static void userDefaults(String username, String pass, Boolean special,Socket socket) throws IOException {

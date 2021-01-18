@@ -26,7 +26,6 @@ class ServerWorker implements Runnable {
                 covidalarm.optionResult(in);
                 out.writeUTF(covidalarm.getInfo());
                 out.flush();
-
             }
             socket.shutdownInput();
             socket.close();

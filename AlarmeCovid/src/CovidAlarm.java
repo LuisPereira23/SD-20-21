@@ -81,7 +81,7 @@ public class CovidAlarm implements Serializable {
                     lock.unlock();
                 }
             }
-            case 7 -> {
+            case 6 -> {
                 lock.lock();
                 try {
                     checkState(packet);
@@ -89,8 +89,8 @@ public class CovidAlarm implements Serializable {
                     lock.unlock();
                 }
             }
-            case 8 -> checkMap();
-            case 9 -> {
+            case 7 -> checkMap();
+            case 8 -> {
                 lock.lock();
                 try {
                     checkSpecial(packet);
@@ -108,23 +108,11 @@ public class CovidAlarm implements Serializable {
 
         if (this.users.containsKey(username)){ //user existe
             if (this.users.get(username).getPassword().equals(pass)) { //pass está correta
-                if(this.users.get(username).getState().equals(false)) //user não tem covid
+                if(this.users.get(username).getState().equals(false)) { //user não tem covid
                     this.info = "Autenticação válida.";
-                else
-                    this.info = "Utilizador deverá estar em quarantena.";
-            }
-            else this.info = "Palavra-passe incorreta.";
-        }
-        else this.info = "Utilizador não existe.";
-    }
-
-    public void updateNearby(User user, Position p){
-        for (User other : this.users.values()) {
-            if (!other.equals(user) && other.getPosition().equals(p)) {
-                other.addNearby(user);
-                user.addNearby(other);
-            }
-        }
+                }else{this.info = "Utilizador deverá estar em quarantena."; }
+            } else{this.info = "Palavra-passe incorreta.";}
+        }else{this.info = "Utilizador não existe.";}
     }
 
     public void userRegister(Packet packet){
@@ -136,12 +124,16 @@ public class CovidAlarm implements Serializable {
         Position p = new Position(m,n);
         if(!this.users.containsKey(username)){
             User user = new User(username,pass,special,p);
-
-            this.usermap.addUser(p,user);
+            usermap.addUser(p,user);
             this.users.put(username, user);
-            updateNearby(user, p);
-
             this.info = "Registo efetuado com sucesso.";
+
+            for (User other : this.users.values()) {
+                if (!other.getUsername().equals(username) && other.getCurrent().equals(p)) {
+                    other.addNearby(user);
+                    user.addNearby(other);
+                }
+            }
         }
         else
             this.info = "Nome de utilizador já está em uso.";
@@ -149,13 +141,12 @@ public class CovidAlarm implements Serializable {
 
     public void reportCovid(Packet packet){
         String username = packet.getUsername();
+        User user = this.users.get(username);
         this.users.get(username).setState(true);
         int m = packet.getM();
         int n = packet.getN();
-        Position p = new Position(m,n); //(m,n)=(9999,9999)
-
-        this.users.get(username).setPosition(p);
-
+        Position p = new Position(m,n);
+        user.setCurrent(p);
         this.info = "Caso de infeção registado com sucesso.";
     }
 
@@ -165,11 +156,15 @@ public class CovidAlarm implements Serializable {
         int m = packet.getM();
         int n = packet.getN();
         Position p = new Position(m,n);
+        user.setCurrent(p);
 
-        this.users.get(username).setPosition(p);
-        updateNearby(user, p);
+        for (User other : this.users.values()) {
+            if (!other.getUsername().equals(username) && other.getCurrent().equals(p)) {
+                other.addNearby(user);
+                user.addNearby(other);
+            }
+        }
         this.usermap.addUser(p.clone(),user);
-
         this.info = "Posição atualizada com sucesso.";
     }
 
@@ -179,7 +174,7 @@ public class CovidAlarm implements Serializable {
         Position p = new Position(m,n);
         int num = 0;
         for (User user : this.users.values()) {
-            if (user.getPosition().equals(p)) {
+            if (user.getCurrent().equals(p)) {
                 num++;
             }
         }
@@ -191,23 +186,31 @@ public class CovidAlarm implements Serializable {
 
     public void checkState(Packet packet){
         String username = packet.getUsername();
-        for (User other : this.users.get(username).getNearbyUsers()) {
+        User user = this.users.get(username);
+        boolean result = false;
+        List<User> list = user.getNearbyUsers();
+        for (User other : list) {
             if (other.getState()) {
-                this.info = "Atenção, esteve em contacto com um utilizador infetado.";
-                break;
+                result = true;
             }
         }
-        this.info = "Não esteve em contacto com nenhum caso de infeção.";
+        if(result == true){
+            this.info = "Atenção, esteve em contacto com um utilizador infetado.";
+        }else{
+            this.info = "Não esteve em contacto com nenhum caso de infeção.";
+        }
     }
 
     public void checkSpecial(Packet packet){
         String username = packet.getUsername();
-        this.info = this.users.get(username).getSpecial().toString();
+        User user = this.users.get(username);
+        this.info=user.getSpecial().toString();
     }
 
     public void checkMap(){
-        this.info = usermap.stringMap();
+        this.info=usermap.stringMap();
     }
+
 
     public void saveCovid(){
         lock.lock();
