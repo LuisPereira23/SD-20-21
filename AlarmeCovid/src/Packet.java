@@ -7,10 +7,10 @@ public class Packet implements Serializable {
     private final int option;
     private final String username;
     private final String password;
-    private Boolean state;
-    private Boolean special;
-    private int m;
-    private int n;
+    private final Boolean state;
+    private final Boolean special;
+    private final int m;
+    private final int n;
 
     public Packet(int option, String username, String password, Boolean state,Boolean special,int m,int n) {
         this.option = option;

@@ -37,7 +37,7 @@ public class UserMap implements Serializable {
 
             for(User user : list){
 
-                if(user.getState() == true){
+                if(user.getState()){
                     infected++;
                 } else{
                     users++;

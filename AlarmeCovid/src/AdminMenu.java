@@ -22,7 +22,7 @@ public class AdminMenu {
         System.out.println("1 - Registar Utilizador Especial ");
         System.out.println("2 - Consultar Contas");
         System.out.println("3 - Consultar Mapa");
-        System.out.println("4 - Gravar Server");
+        System.out.println("4 - Gravar Servidor");
         System.out.println("0 - Sair");
         String option = in.next();
 

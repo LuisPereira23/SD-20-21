@@ -9,7 +9,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 public class CovidAlarm implements Serializable {
-
     @Serial
     private static final long serialVersionUID = 3726281774063155278L;
     private Map<String, User> users;
@@ -29,13 +28,6 @@ public class CovidAlarm implements Serializable {
         return this.users;
     }
     public String getInfo() { return this.info; }
-
-    public void userAccounts() {
-        Map<String, User> map = getUser();
-        this.info= map.keySet().stream()
-                .map(key -> key + "=" + map.get(key).getPassword())
-                .collect(Collectors.joining(", ", "{", "}"));
-    }
 
     public void optionResult(DataInputStream in) throws IOException{
         Packet packet = Packet.deserialize(in);
@@ -215,9 +207,10 @@ public class CovidAlarm implements Serializable {
         for (User other : list) {
             if (other.getState()) {
                 result = true;
+                break;
             }
         }
-        if(result == true){
+        if(result){
             this.info = "Atenção, esteve em contacto com um utilizador infetado.";
         }else{
             this.info = "Não esteve em contacto com nenhum caso de infeção.";
@@ -234,7 +227,6 @@ public class CovidAlarm implements Serializable {
         this.info=usermap.stringMap();
     }
 
-
     public void saveCovid(){
         lock.lock();
         try {
@@ -244,5 +236,24 @@ public class CovidAlarm implements Serializable {
         }finally {
             lock.unlock();
         }
+    }
+
+    public void userAccounts() {
+        StringBuffer specials = new StringBuffer();
+        StringBuffer normals = new StringBuffer();
+
+        for(User u: getUser().values()){
+            if(u.getSpecial()){
+                specials.append("[Especial] Username: ").append(u.getUsername())
+                        .append(" | Password: ").append(u.getPassword())
+                        .append("\n");
+            }
+            else{
+                normals.append("Username: ").append(u.getUsername())
+                       .append(" | Password: ").append(u.getPassword())
+                       .append("\n");
+            }
+        }
+        this.info = specials + normals.toString();
     }
 }
